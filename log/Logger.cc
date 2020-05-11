@@ -1,3 +1,9 @@
+/*
+ * @Description: 
+ * @version: 
+ * @Author: blalalt
+ * @Date: 2020-05-11 17:21:55
+ */
 #include <sstream>
 #include <chrono>
 #include <string.h>
@@ -40,7 +46,6 @@ thread_local char t_buf[24];
 std::string Logger::format_time() {
     using std::chrono::time_point_cast;
     using std::chrono::microseconds;
-    using std::chrono::system_clock;
     using std::chrono::system_clock;
 
     size_t day_len = 19;
@@ -88,4 +93,5 @@ void Logger::log(LogLevel level, const char *file, int line, const char *format,
     log_text_buf[n] = '\n';
     log_text_buf[n+1] = '\0';
     out_put_func_(log_text_buf, ::strlen(log_text_buf));
+    if (level == Logger::LogLevel::FATAL) abort();
 }

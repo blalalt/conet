@@ -1,11 +1,11 @@
 
 find_package(Threads)
 
-include_directories(../log)
-aux_source_directory(../log LOG_SRC)
 add_executable(logtest LogTest.cc ${LOG_SRC})
-target_link_libraries (logtest ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (logtest conet_log)
 
-include_directories(../net) # 引入头文件
-aux_source_directory(../net NET_SRC) # 指定源文件目录
-add_executable(inetest INetAddr.cc ${NET_SRC})
+add_executable(inetest INetAddr.cc )
+target_link_libraries (inetest conet_net)
+
+add_executable(socktest SocketTest.cc)
+target_link_libraries (socktest conet_net)
