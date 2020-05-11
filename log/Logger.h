@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <stdarg.h>
 
 namespace conet
 {
@@ -17,7 +18,7 @@ namespace conet
             FATAL,
             NUM_OF_LEVEl
         };
-        static void log(LogLevel level, const char *file, int line, std::string msg);
+        static void log(LogLevel level, const char *file, int line, const char *format, ...);
 
         
 
@@ -30,10 +31,10 @@ namespace conet
         static std::function<void()> flush_func_;
     };
 // 下面是一些宏，在使用的时候都是使用这些宏展开，方便记录 所在文件，函数，和行数
-#define LOG_INFO(msg) {Logger::log(Logger::INFO,  __FILE__, __LINE__, msg);}
-#define LOG_DEBUG(msg){Logger::log(Logger::DEBUG, __FILE__, __LINE__, msg);}
-#define LOG_TRACE(msg){Logger::log(Logger::TRACE, __FILE__, __LINE__, msg);}
-#define LOG_WARN(msg) {Logger::log(Logger::WARN,  __FILE__, __LINE__, msg);}
-#define LOG_ERROR(msg){Logger::log(Logger::ERROR, __FILE__, __LINE__, msg);}
-#define LOG_FATAL(msg){Logger::log(Logger::FATAL, __FILE__, __LINE__, msg);}
+#define LOG_INFO(format, ...)  Logger::log(Logger::INFO,  __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_DEBUG(format, ...) Logger::log(Logger::DEBUG, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_TRACE(format, ...) Logger::log(Logger::TRACE, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_WARN(format, ...)  Logger::log(Logger::WARN,  __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_ERROR(format, ...) Logger::log(Logger::ERROR, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_FATAL(format, ...) Logger::log(Logger::FATAL, __FILE__, __LINE__, format, ##__VA_ARGS__)
 } // namespace conet

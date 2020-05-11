@@ -1,5 +1,6 @@
 #include <sstream>
 #include <chrono>
+#include <string.h>
 #include <assert.h>
 #include "Logger.h"
 
@@ -67,16 +68,24 @@ std::string Logger::format_file(const std::string file_name) {
     else return file_name.substr(pos+1);
 }
 
-void Logger::log(LogLevel level, const char *file, int line, std::string msg){
+void Logger::log(LogLevel level, const char *file, int line, const char *format, ...){
     // 输出的格式为 [时间][日志等级] (所在文件:行号) - 输出的内容
     // [2019-02-12 09:22:10:3][INFO] (LogFile.cc:35) - 启动
     // char out_buf[1024];
     // ::snprintf()
     if (level < g_log_level) return ;
-    std::ostringstream os;
-    os << '[' << format_time() << ']';
-    os << '[' << log_level_names[level] << ']';
-    os << '(' << format_file(file) << ':' << line << ')';
-    os << " - " << msg << '\n';
-    out_put_func_(os.str().c_str(), os.str().length());
+    va_list argp;
+    va_start(argp, format);
+    char log_text_buf[1024];
+    int n = ::snprintf(log_text_buf, sizeof(log_text_buf),
+                       "[%s][%s](%s:%d) - ",
+                       format_time().c_str(), 
+                       log_level_names[level], 
+                       format_file(file).c_str(), line);
+
+    n += ::vsnprintf(log_text_buf+n, sizeof(log_text_buf)-n-1, format, argp);
+    va_end(argp);
+    log_text_buf[n] = '\n';
+    log_text_buf[n+1] = '\0';
+    out_put_func_(log_text_buf, ::strlen(log_text_buf));
 }
