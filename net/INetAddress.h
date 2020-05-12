@@ -7,13 +7,18 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <tuple>
 #include <netinet/in.h>
 
 namespace conet {
 
+class INetAddress;
+typedef std::shared_ptr<INetAddress> INetAddressPtr;
+
 class INetAddress {
 public:
+    INetAddress() {}
     explicit INetAddress(const std::string ip_port);
     explicit INetAddress(int port);
     INetAddress(const std::string ip, int port);
@@ -21,6 +26,9 @@ public:
 
 
     sockaddr* ptr() { return reinterpret_cast<sockaddr*>(&addr_); }
+    const sockaddr* ptr() const {
+        return reinterpret_cast<const sockaddr*>(&addr_);
+    }
     // sockaddr* ptr() { return const_cast<sockaddr*>(ptr()); }
 
     socklen_t length () const { return sizeof(addr_); }

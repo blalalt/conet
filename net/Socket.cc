@@ -14,7 +14,7 @@
 using namespace conet;
 
 
-void Socket::bind(INetAddress &addr) {
+void Socket::bind(const INetAddress &addr) {
     int status = ::bind(handle_, addr.ptr(), addr.length());
     if (status < 0) {
         int err = errno;
@@ -67,10 +67,13 @@ ssize_t Socket::read_v(std::vector<iovec> &vec) {
 }
 
 Socket Socket::create(int domain, int type, int protocol) {
+//    return std::make_shared<Socket>(::socket(domain, type, protocol));
     return Socket(::socket(domain, type, protocol));
 }
 std::tuple<Socket, Socket> Socket::pair(int domain, int type, int protocol) {
     int fds[2] = {0};
     socketpair(domain, type, protocol, fds);
+//    return std::make_tuple( std::make_shared<Socket>(fds[0]),
+//                            std::make_shared<Socket>(fds[1]));
     return std::make_tuple(Socket(fds[0]), Socket(fds[1]));
 }

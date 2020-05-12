@@ -6,21 +6,28 @@
  */
 #pragma once
 #include <vector>
+#include <memory>
 #include "INetAddress.h"
 namespace conet
 {
+    class Socket;
+    typedef std::shared_ptr<Socket> SocketPtr;
 
-    class Socket
+    class Socket // non copyable
     {
     protected:
         const static int INVALID_SOCKET = -1;
     public:
         Socket() : handle_(INVALID_SOCKET) {}
         explicit Socket(int sockfd) : handle_(sockfd) {}
-        ~Socket() = default;
-        Socket(const Socket &) = default;
+        ~Socket() { if (handle_ != INVALID_SOCKET) close(); }
+        Socket(Socket &&sock) noexcept : handle_(sock.handle_) {
+            sock.handle_ = INVALID_SOCKET;
+        }
+        Socket(const Socket &) = delete;
+        Socket& operator=(const Socket&) = delete;
 
-        void bind(INetAddress &addr);
+        void bind(const INetAddress &addr);
         bool is_valid() const;
         void close(); // 同时关闭读写
         void shutdown_write(); // 关闭读

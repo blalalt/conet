@@ -9,3 +9,6 @@ target_link_libraries (inetest conet_net)
 
 add_executable(socktest SocketTest.cc)
 target_link_libraries (socktest conet_net)
+
+add_executable(acceptest AcceptorTest.cc)
+target_link_libraries (acceptest conet_net)
