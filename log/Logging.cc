@@ -1,3 +1,9 @@
+/*
+ * @Description: 
+ * @version: 
+ * @Author: blalalt
+ * @Date: 2020-05-13 15:01:59
+ */
 #include <functional>
 #include "Logging.h"
 
@@ -54,10 +60,11 @@ void Logging::thread_func() {
         {
 
             std::unique_lock<std::mutex> lck(mutex_);
-            if (buffers_.empty()) {
+            cond_.wait(lck, [this]{ return !buffers_.empty();});
+            // if (buffers_.empty()) {
 //                cond_.wait_for(lck, std::chrono::seconds(flush_interval_));
-                cond_.wait(lck);
-            }
+                // cond_.wait(lck);
+            // }
 //            lck.unlock();
 //            sleep(100);
             // 把当前缓冲的内容添加到缓冲队列(待写入)中

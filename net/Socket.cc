@@ -75,5 +75,5 @@ std::tuple<Socket, Socket> Socket::pair(int domain, int type, int protocol) {
     socketpair(domain, type, protocol, fds);
 //    return std::make_tuple( std::make_shared<Socket>(fds[0]),
 //                            std::make_shared<Socket>(fds[1]));
-    return std::make_tuple(Socket(fds[0]), Socket(fds[1]));
+    return std::forward_as_tuple(Socket(fds[0]), Socket(fds[1]));
 }

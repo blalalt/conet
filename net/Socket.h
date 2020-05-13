@@ -44,6 +44,7 @@ namespace conet
         ssize_t read_v(std::vector<iovec> &vecs);
         
         bool operator==(const Socket &);
+        Socket& operator=(Socket&& sock) { std::swap(handle_, sock.handle_); }
 
         static Socket create(int domain, int type, int protocol=0);
         static std::tuple<Socket, Socket> pair(int domain, int type, int protocol=0);

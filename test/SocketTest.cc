@@ -22,7 +22,7 @@ int main() {
     s2.bind(addr); 
 
     Socket sig_read, sig_write;
-    std::tie(sig_read, sig_write) = Socket::pair(AF_UNIX, SOCK_STREAM, 0);
+    std::tie(sig_read, sig_write) = std::move(Socket::pair(AF_UNIX, SOCK_STREAM, 0));
     char write_buf[1024];
     snprintf(write_buf, sizeof(write_buf), "%s\n", "hello world.");
     sig_write.write(write_buf, sizeof(write_buf));
