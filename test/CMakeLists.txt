@@ -12,3 +12,6 @@ target_link_libraries (socktest conet_net)
 
 add_executable(acceptest AcceptorTest.cc)
 target_link_libraries (acceptest conet_net)
+
+add_executable(conqueue CQueueTest.cc)
+target_link_libraries(conqueue pthread)
