@@ -14,10 +14,30 @@
 #include <iterator>
 #include <functional>
 #include <condition_variable>
-#include <deque>
 #include "../ds/ConcurrentQueue.h"
 namespace conet {
 
+// class Task {
+// public:
+//     Task(std::function<void()> cb) : cb_(cb) {}
+// private:
+//     std::function<void()> cb_;
+// };
+
+// class TaskExecutor {
+// public:
+//     TaskExecutor();
+//     void start() {
+//         thread_ = std::make_unique<std::thread>([&]{ this->execute(); }
+//     }
+// private:
+//     void execute() {
+
+//     }
+// private:
+//     std::unique_ptr<std::thread> thread_;
+//     ConcurrentQueue<Task> tasks_;
+// };
 template<typename T>
 class ThreadPool {
 public:
@@ -27,7 +47,6 @@ public:
     ~ThreadPool() { stop(); }
     void start();
     void stop();
-    Task take();
     void add_task(Task t);
 
 private:
@@ -35,10 +54,14 @@ private:
 private:
     std::atomic_bool running_;
     size_t num_thread_;
-    std::mutex mutex_;
-    std::condition_variable cond_;
+    // 注意这里的 workers_和tasks_的定义顺序不能更换
+    // 队列会先调用析构函数，在析构函数中会唤醒所有阻塞的线程
+    // 这样 workers_ 内的线程才会自行退出，否则会一直阻塞
+    // TODO: 还有问题，即使唤醒了所有线程，还会有线程阻塞在队列上
+    // 如果在线程阻塞的时候队列销毁了，会引起 Core dump 程序直接崩溃
+    // 还需要给线程增加一个中断的标记，使得线程可以自我唤醒
     std::vector<std::thread> workers_;
-    std::deque<Task> tasks_;
+    ConcurrentQueue<Task> tasks_;
 };
 
 template<typename T>
@@ -57,11 +80,8 @@ void ThreadPool<T>::start() {
 
 template<typename T>
 void ThreadPool<T>::stop() {
-    {
-        std::lock_guard<std::mutex> lck(mutex_);
-        running_ = false;
-        cond_.notify_all();
-    }
+    running_ = false;
+
     std::for_each(workers_.begin(), workers_.end(), [&](std::thread & t){
         t.join();
     });
@@ -69,34 +89,22 @@ void ThreadPool<T>::stop() {
 
 template<typename T>
 void ThreadPool<T>::add_task(Task t) {
-    std::lock_guard<std::mutex> lck(mutex_);
-    tasks_.push_back(t);
-    cond_.notify_one();
-}
-
-template<typename T>
-T ThreadPool<T>::take() {
-    // 等待队列中有元素
-    std::unique_lock<std::mutex> lck(mutex_);
-    while (tasks_.empty() && running_) {
-        cond_.wait(lck);
-    }
-    Task t;
-    if (!tasks_.empty()) { // 需要判断是不是 running_为false而退出循环
-        t = tasks_.front();
-        tasks_.pop_front();
-    }
-    return t;
+    tasks_.put(t);
 }
 
 template<typename T>
 void ThreadPool<T>::worker_thread() {
     Task t;
     while (running_) {
-        t = take(); // 让线程阻塞在条件变量上
-        if (t) {
-            t();
-        }
+        tasks_.take(t); // 让线程阻塞在条件变量上
+        t();
+        // 下面这种写法是 busy-loop 的
+        // https://www.zhihu.com/question/30432095
+        // if (tasks_.try_take(t)) {
+        //     t();
+        // } else {
+        //     std::this_thread::yield();
+        // }
     }
 }
 

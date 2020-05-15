@@ -10,6 +10,8 @@
 #include <thread>
 #include <vector>
 #include <assert.h>
+#include <functional>
+#include <unistd.h>
 using namespace conet;
 using namespace std;
 
@@ -23,6 +25,24 @@ void take_to_q() {
     int a ;
     q.take(a);
     // cout << a << endl;
+}
+
+void takeq1(ConcurrentQueue<int> & q1) {
+    int a;
+    q1.take(a);
+}
+
+// 测试：一个线程阻塞在队列上时，队列被销毁了，会发生什么情况
+void test_when_wait_destory() {
+    thread t;
+    {
+        ConcurrentQueue<int> q1;
+        t = thread(std::bind(takeq1, std::ref(q1)));
+        sleep(1);
+        // q1 销毁
+    }
+    t.join();
+    cout << "down" << endl;
 }
 
 int main() {
@@ -39,6 +59,6 @@ int main() {
     }
 
     assert(q.empty());
-
+    test_when_wait_destory();
     return 0;
 }

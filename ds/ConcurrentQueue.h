@@ -16,6 +16,7 @@ class ConcurrentQueue {
 
 public:
     ConcurrentQueue() : head_(new node), tail_(head_.get()) {}
+    ~ConcurrentQueue() { cond_.notify_all(); } // 销毁的时候唤醒所有阻塞在队列上的线程
     ConcurrentQueue(const ConcurrentQueue&) = delete;
     ConcurrentQueue& operator=(const ConcurrentQueue&) = delete;
 public:
@@ -37,7 +38,7 @@ private:
         // std::lock_guard<std::mutex> lk(head_mutex_);
         std::unique_ptr<node> old_head = std::move(head_);
         head_ = std::move(old_head->next);
-        return old_head;    
+        return old_head; 
     }
 
 private:
