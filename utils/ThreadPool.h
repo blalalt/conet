@@ -24,14 +24,14 @@ public:
     typedef T Task;
 
     ThreadPool(int size);
-    ~ThreadPool() { stop(); }
+    ~ThreadPool() { if (running_) stop(); } // 防止重复调用 stop
     void start();
     void stop();
-    Task take();
     void add_task(Task t);
 
 private:
     void worker_thread();
+    Task take();
 private:
     std::atomic_bool running_;
     size_t num_thread_;
