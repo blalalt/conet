@@ -6,12 +6,12 @@
  */ 
 
 enum class EventType {
-    ACCEPT_EVENT = 01,
-    READ_EVENT = 02,
-    WRITE_EVENT = 04,
-    TIMEOUT_EVENT = 010,
-    SIGNAL_EVENT = 020,
-    CLOSE_EVENT = 040
+    ACCEPT_EVENT = 0x1,
+    READ_EVENT = 0x2,
+    WRITE_EVENT = 0x4,
+    TIMEOUT_EVENT = 0x10,
+    SIGNAL_EVENT = 0x20,
+    CLOSE_EVENT = 0x40
 };
 
 class Handle {
