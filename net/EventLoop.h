@@ -1,5 +1,5 @@
 /*
- * @Description: 事件循环，Reactor
+ * @Description: 事件循环，Reactor, at most one per thread.
  * @version: 
  * @Author: blalalt
  * @Date: 2020-05-21 20:46:02
@@ -8,6 +8,8 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include "Timer.h"
+#include "../utils/TimeStamp.h"
 
 namespace conet {
 
@@ -17,14 +19,42 @@ class Poller;
 
 class EventLoop {
 public:
+    EventLoop();
+    ~EventLoop();
+    void wakeup(); // 唤醒
+    bool is_inloop_thread() } { return thread_id_ == std::this_thread::get_id(); }
+    void assert_inloop_thread() {
+        if (!is_inloop_thread()) {
+            abort_not_inloop_thread();
+        }
+    }
+    // 事件循环相关函数
+    void loop();
+    void quit();
+        // 线程安全的，因为只会在当前IO线程内执行,
+        // 但对 pending_functors_的访问是不安全的，所以需要加锁
+    void run_inloop(const Functor& cb);
+    void queue_inloop(const Functor& cb);
 
+    // 通道相关函数
+    void update_channel(Channel * channel);
+    void remove_channel(Channel * channel);
+
+    // 定时器相关函数
+    TimerId register_timer(Timer timer);
+    void unregister_timer(TimerID tid);
+private:
+    // 函数内调用read 掉 wakeupFd_ 的数据，避免一直触发。
+    void handle_read(); // wake up
+    void abort_not_inloop_thread();
 private:
     typedef int handle_t;
     typedef std::function<void()> Functor;
-    typedef std::vector<std::unique_ptr<Channel> > ChannelList;
+    // 这里不控制 Channel的生命周期
+    typedef std::vector<Channel*> ChannelList;
     // 四个状态值
     bool quit_; // 是否退出
-    bool looping_; // 是否结束事件循环
+    bool looping_; // 是否正在运行事件循环
     bool doing_pending_functors_; // 是否正在执行 pending functors
     bool event_handling_; // 是否正在处理事件
 
