@@ -22,7 +22,7 @@ public:
     EventLoop();
     ~EventLoop();
     void wakeup(); // 唤醒
-    bool is_inloop_thread() } { return thread_id_ == std::this_thread::get_id(); }
+    bool is_inloop_thread()  { return thread_id_ == std::this_thread::get_id(); }
     void assert_inloop_thread() {
         if (!is_inloop_thread()) {
             abort_not_inloop_thread();
