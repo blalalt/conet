@@ -30,6 +30,7 @@ private:
 private:
     struct Entry;
     typedef std::vector<Entry> TiemrList;
-
+    const int timer_fd_;
+    std::unique_ptr<Channel> timer_channel_;
 };
 }
