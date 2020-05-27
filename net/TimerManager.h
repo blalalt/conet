@@ -17,7 +17,7 @@ namespace conet {
 
 class TimerManager {
 //TODO: 完成定时器管理
-    TimerManager();
+    TimerManager(EventLoop * loop, );
     ~TimerManager() = default;
 
     TimerId add_timer(TimeStamp when, TimerCallback cb, double interval);
@@ -29,8 +29,10 @@ private:
     void tick(); // 执行到期的定时器
 private:
     struct Entry;
-    typedef std::vector<Entry> TiemrList;
+    typedef std::vector<Entry> TimerList;
+    TiemrList timers_;
     const int timer_fd_;
     std::unique_ptr<Channel> timer_channel_;
+    EventLoop * owner_loop_;
 };
 }
