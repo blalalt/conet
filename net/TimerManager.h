@@ -12,6 +12,7 @@
 #include <Timer.h>
 #include <memory>
 #include <vector>
+#include <queue>
 #include "../utils/TimeStamp.h"
 namespace conet {
 
@@ -20,7 +21,7 @@ class TimerManager {
     TimerManager(EventLoop * loop, );
     ~TimerManager() = default;
 
-    TimerId add_timer(TimeStamp when, TimerCallback cb, double interval);
+    TimerID add_timer(TimeStamp when, TimerCallback cb, double interval);
     void cancle(TimerID tid);
 private:
     // 处理定时器句柄的可读事件，即有定时器激活到期，内部调用tick处理到期定时器
@@ -28,9 +29,7 @@ private:
     bool insert(); // 定时器列表中插入定时器
     void tick(); // 执行到期的定时器
 private:
-    struct Entry;
-    typedef std::vector<Entry> TimerList;
-    TiemrList timers_;
+    std::priority_queue<std::unique_ptr<Timer> > timers_;
     const int timer_fd_;
     std::unique_ptr<Channel> timer_channel_;
     EventLoop * owner_loop_;

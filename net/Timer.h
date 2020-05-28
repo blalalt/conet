@@ -9,6 +9,7 @@
 #include "../utils/TimeStamp.h"
 namespace conet {
 
+typedef int64_t TimerID;
 class Timer {
 public:
     typedef std::function<void()> TimerCallback;
@@ -22,6 +23,9 @@ public:
     TimeStamp expiration() const { return expiration_; }
     bool repeat() const { return repeat_; }
     int64_t sequence() const { return sequence_id_; }
+    bool operator<(const Timer & other) {
+        return expiration_ <= other.expiration_;
+    }
     void restart(TimeStamp now) {
         // 每次执行完 定时器相关回调后，会调用restart，
         if (repeat_) {
@@ -38,18 +42,6 @@ private:
     const int64_t sequence_id_; // 编号
     const double interval_; // 间隔
     const bool repeat_; // 是否是重复定时器
-};
-
-std::atomic<int64_t> Timer::num_created_;
-
-class TimerID {
-public:
-    TimerID() : timer_(nullptr), seq_(0) {}
-    TimerID(Timer *t, int64_t seq) : timer_(t), seq_(seq) {}
-
-private:
-    Timer * timer_;
-    int64_t seq_;
 };
 
 }

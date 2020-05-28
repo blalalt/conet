@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include "EventLoop.h"
 #include "Channel.h"
+#include "Timer.h"
 #include <../utils/TimeStamp.h>
 #include "../log/Logger.h"
 
@@ -57,7 +58,11 @@ namespace {
 
 struct TimerManager::Entry {
 public:
+    Entry(const Timer::TimerCallback &cb, TimeStamp when, double interval)
+        : timer_(std::make_unique<Timer>(cb, when, interval)) {}
     int id() const { return timer_->sequence(); }
+    void run() { timer_->run(); }
+    TimeStamp when() const { return timer_->expiration(); }
     bool operator<(const Entry& other) {
         return timer_->expiration() <= other.timer_->expiration();
     }
@@ -81,6 +86,35 @@ void TimerManager::handle_read() {
     tick(); // 处理到期的定时器
 }
 
+bool TimerManager::insert() {
+
+}
+
 void TimerManager::tick() {
     // TODO: implement tick function
+    TimeStamp now = TimeStamp::now(); // current time
+    std::vector<std::unique_ptr<Timer> > expired_timers; // 已经到期的定时器列表
+    // 获取已经到期的定时器
+    while (!timers_.empty()) {
+        const Timer & timer = timers_.top();
+        if (timer.expiration() < now) {
+            // 已经到期
+            // TODO: pop不返回，怎么把它加入到 expired_timers; move(const reference) 是否可行
+            expired_timers.push_back(std::move(timer)); // ???
+            timers_.pop();
+        }
+    }
+    auto it = timers_.begin();
+    for (; it != timers_.end(); it++) {
+        if (*it.when() > now) break;
+        // 执行定时任务
+        *it.run();
+        expired_timers.push_back(std::move(*it));
+    }
+    // 从定时器列表中将已到期的定时器删除
+    timers_.erase(timers_.begin(), it);
+    it = expired_timers.begin();
+    for (; it !+ expired_timers.end(); it ++) {
+
+    }
 }
