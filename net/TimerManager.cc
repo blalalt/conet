@@ -115,6 +115,6 @@ void TimerManager::tick() {
     timers_.erase(timers_.begin(), it);
     it = expired_timers.begin();
     for (; it !+ expired_timers.end(); it ++) {
-
+        if (*it->repeat)
     }
 }
