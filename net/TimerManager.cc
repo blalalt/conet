@@ -8,6 +8,7 @@
 
 #include <sys/timerfd.h>
 #include <functional>
+#include <algorithm>
 #include <unistd.h>
 #include "EventLoop.h"
 #include "Channel.h"
@@ -86,8 +87,17 @@ void TimerManager::handle_read() {
     tick(); // 处理到期的定时器
 }
 
-bool TimerManager::insert() {
-
+bool TimerManager::insert(std::unique_ptr<Timer> timer) {
+    bool update_expiration_time = false;
+    auto it = timers_.begin();
+    for (; it != timers_.end(); ++it) {
+        if (*it->expiration() > timer->expiration()) {
+            break; // 找到第一个比timer时间长的位置
+        }
+    }
+    if (it == timers_.begin()) update_expiration_time = true;
+    timers_.insert(it, std::move(*timer)); // 插入到该位置
+    return update_expiration_time;
 }
 
 void TimerManager::tick() {
@@ -96,23 +106,29 @@ void TimerManager::tick() {
     std::vector<std::unique_ptr<Timer> > expired_timers; // 已经到期的定时器列表
     // 获取已经到期的定时器
     while (!timers_.empty()) {
-        const Timer & timer = timers_.top();
+        Timer & timer = timers_.front();
         if (timer.expiration() < now) {
             // 已经到期
-            // TODO: pop不返回，怎么把它加入到 expired_timers; move(const reference) 是否可行
             expired_timers.push_back(std::move(timer)); // ???
-            timers_.pop();
+            timers_.pop_front();
+        } else {
+            break; // 链表是从小到大的,所以后续的定时器都不过期
         }
     }
-    auto it = timers_.begin();
-    for (; it != timers_.end(); it++) {
-        if (*it.when() > now) break;
+    auto it = expired_timers.begin();
+    for (; it != expired_timers.end(); it++) {
         // 执行定时任务
         *it.run();
-        expired_timers.push_back(std::move(*it));
+        if (*it->repeat()) {
+            // 周期性定时器
+            *it->restart();
+            // 重新插入到定时器列表内
+            insert(std::move(*it));
+        } else {
+            // 一次性定时器
+
+        }
     }
-    // 从定时器列表中将已到期的定时器删除
-    timers_.erase(timers_.begin(), it);
     it = expired_timers.begin();
     for (; it !+ expired_timers.end(); it ++) {
         if (*it->repeat)

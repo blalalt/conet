@@ -11,6 +11,7 @@
 #include <set>
 #include <Timer.h>
 #include <memory>
+#include <list>
 #include <vector>
 #include <queue>
 #include "../utils/TimeStamp.h"
@@ -29,7 +30,8 @@ private:
     bool insert(); // 定时器列表中插入定时器
     void tick(); // 执行到期的定时器
 private:
-    std::priority_queue<std::unique_ptr<Timer> > timers_;
+    //std::priority_queue<std::unique_ptr<Timer> > timers_;
+    std::list<std::unique_ptr<Timer>> timers_;
     const int timer_fd_;
     std::unique_ptr<Channel> timer_channel_;
     EventLoop * owner_loop_;
