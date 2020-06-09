@@ -123,7 +123,10 @@ void TimerManager::tick() {
             // 周期性定时器
             *it->restart();
             // 重新插入到定时器列表内
-            insert(std::move(*it));
+            bool require_update_timeout = insert(std::move(*it));
+            if (require_update_timeout) {
+                ::reset_timerfd(timer_fd_, *timers_.front()->expiration());
+            }
         } else {
             // 一次性定时器
 
