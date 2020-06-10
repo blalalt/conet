@@ -15,7 +15,7 @@ namespace conet {
 
 class Channel;
 class TimerManager;
-class Poller;
+class EventDemultiplexer;
 
 class EventLoop {
 public:
@@ -42,7 +42,7 @@ public:
 
     // 定时器相关函数
     TimerId register_timer(Timer timer);
-    void unregister_timer(TimerID tid);
+    void unregister_timer(int64_t timer_id);
 private:
     // 函数内调用read 掉 wakeupFd_ 的数据，避免一直触发。
     void handle_read(); // wake up
@@ -73,7 +73,8 @@ private:
     ChannelList active_channels_;
 
     // IO复用
-    std::unique_ptr<Poller> poll_;
+    std::unique_ptr<EventDemultiplexer> demultiplexer_;
+
     // 定时器管理
     std::unique_ptr<TimerManager> timer_queue_;
 };

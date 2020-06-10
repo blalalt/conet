@@ -12,6 +12,7 @@ using namespace conet;
 
 namespace {
     thread_local EventLoop * t_loop = nullptr;
+    const int kPollTimeMS = 10000;
     int create_eventfd() {
         int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
         if (evtfd < 0)
@@ -50,4 +51,17 @@ EventLoop::EventLoop()
 EventLoop::~EventLoop() {
     ::close(wakeup_fd_);
     t_loop = nullptr;
+}
+
+void EventLoop::loop() {
+    abort_not_inloop_thread();
+    looping_ = true;
+    quit_ = false;
+    // IO loop
+    while (quit_) {
+        event_handling_ = true; // 在removeChannel中用到
+        active_channels_.clear();
+        // 从 事件多路分发器 获取 产生事件的通道
+        // TODO: 0610, 完成 事件多路分发器后再来处理
+    }
 }
