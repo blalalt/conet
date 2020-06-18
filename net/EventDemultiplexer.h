@@ -4,12 +4,13 @@
  * @Author: blalalt
  * @Date: 1970-01-01 08:00:00
  */
+#pragma once
 #include <vector>
 #include <map>
 
 namespace conet
 {
-
+    class Channel;
     class EventLoop;
     class EventDemultiplexer
     {
@@ -24,11 +25,11 @@ namespace conet
 
     private:
         static const int kListenEventListSize = 16;
-        typedef handle_t int;
+        typedef int handle_t;
         typedef std::vector<Channel *> ChannelList;
         typedef std::map<handle_t, Channel *> ChannleMap;
         EventLoop *this_loop_;
-        hanle_t epoll_fd_;          // epoll 句柄
+        handle_t epoll_fd_;          // epoll 句柄
         ChannelList events_;        // 监听的兴趣列表
         ChannleMap handle2channel_; // fd到channel映射
     };

@@ -4,8 +4,9 @@
  * @Author: blalalt
  * @Date: 2020-05-22 09:08:56
  */ 
-
+#pragma once
 #include <sys/time.h>
+#include <cstdint>
 
 namespace conet {
 
@@ -23,43 +24,50 @@ public:
     }
 
     static const int kMicroPerSecond = 1e6;
-    static TimeStamp now();
-    static TimeStamp invalid(); 
+    static TimeStamp now() {
+        struct timeval tv;
+        ::gettimeofday(&tv, nullptr);
+        int64_t sec = tv.tv_sec;
+        return TimeStamp(sec * TimeStamp::kMicroPerSecond + tv.tv_usec);
+    }
+    static TimeStamp invalid() {
+        return TimeStamp();
+    }
+    bool operator<(const TimeStamp & other) const {
+        return this->micro_sec_since1970 < other.micro_sec_since1970;
+    }
+    bool operator>(const TimeStamp & other) const {
+        return this->micro_sec_since1970 > other.micro_sec_since1970;
+    }
+    bool operator<=(const TimeStamp & other) const {
+        return this->micro_sec_since1970 <= other.micro_sec_since1970;
+    }
+    bool operator>=(const TimeStamp & other) const {
+        return this->micro_sec_since1970 >= other.micro_sec_since1970;
+    }
+    bool operator==(const TimeStamp & other) const {
+        return this->micro_sec_since1970 == other.micro_sec_since1970;
+    }
 private:
     int64_t micro_sec_since1970;
 };
 
-TimeStamp TimeStamp::now() {
-    struct timeval tv;
-    ::gettimeofday(&tv, nullptr);
-    int64_t sec = tv.tv_sec();
-    return TimeStamp(sec * TimeStamp::kMicroPerSecond + tv.tv_usec());
-}
+//TimeStamp TimeStamp::now()
+//
+//TimeStamp TimeStamp::invalid() {
+//    return TimeStamp();
+//}
 
-TimeStamp TimeStamp::invalid() {
-    return TimeStamp();
-}
-
-inline bool operator==(TimeStamp lhs, TimeStamp rhs) {
-    return lhs.micro_sec() == rhs.micro_sec();
-}
-inline bool operator>(TimeStamp lhs, TimeStamp rhs) {
-    return lhs.micro_sec() > rhs.micro_sec();
-}
-inline bool operator<(TimeStamp lhs, TimeStamp rhs) {
-    return lhs.micro_sec() < rhs.micro_sec();
-}
-
-inline double operator-(TimeStamp high, TimeStamp low) {
+inline TimeStamp operator-(const TimeStamp high, const TimeStamp low) {
     int64_t diff = high.micro_sec() - low.micro_sec();
-    return static_cast<double>(diff / TimeStamp::kMicroPerSecond);
+    return TimeStamp(diff);
 }
 
-inline TimeStamp operator+(TimeStamp t, double sec) {
+inline TimeStamp operator+(const TimeStamp t, double sec) {
     int64_t delta = static_cast<int64_t>(sec * TimeStamp::kMicroPerSecond);
     return TimeStamp(delta + t.micro_sec());
 }
-inline TimeStamp operator+(double sec, TimeStamp t) {
+inline TimeStamp operator+(double sec, const TimeStamp t) {
     int64_t delta = static_cast<int64_t>(sec * TimeStamp::kMicroPerSecond);
     return TimeStamp(delta + t.micro_sec());
 }

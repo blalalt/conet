@@ -22,12 +22,14 @@ EventDemultiplexer::~EventDemultiplexer() {
 
 }
 
-EventDemultiplexer::updateChannel() {
+void EventDemultiplexer::demultiplex(const int timeoutms, std::vector<Channel *> out_channels) {
 
 }
-EventDemultiplexer::removeChannel() {
+
+void EventDemultiplexer::updateChannel(Channel *channel) {
 
 }
-EventDemultiplexer::demultiplex() {
-    
+
+void EventDemultiplexer::removeChannel(Channel *channel) {
+
 }

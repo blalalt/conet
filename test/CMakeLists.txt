@@ -18,3 +18,13 @@ target_link_libraries(conqueue pthread)
 
 add_executable(thptest ThreadPoolTest.cc)
 target_link_libraries(thptest pthread)
+
+add_executable(timestamptest TimeStampTest.cc)
+target_link_libraries(timestamptest pthread)
+
+add_executable(timertest TimerTest.cc)
+target_link_libraries(timertest pthread)
+
+add_executable(timermanagertest TimerManagerTest.cc)
+target_link_libraries(timermanagertest conet_net)
+

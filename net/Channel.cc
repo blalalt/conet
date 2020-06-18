@@ -5,11 +5,12 @@
 #include "Channel.h"
 #include "EventLoop.h"
 #include <sys/epoll.h>
+#include <sys/poll.h>
 using namespace conet;
 
 const int Channel::kNoneEvent = 0;
 const int Channel::kWriteEvent = EPOLLOUT;
-const int Channel::KReadEvent = EPOLLIN | EPOLLPRI;
+const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
 
 Channel::Channel(conet::EventLoop *loop, conet::Channel::handle_t fd)
     : loop_(loop),
@@ -17,12 +18,8 @@ Channel::Channel(conet::EventLoop *loop, conet::Channel::handle_t fd)
       tied_(false),
       event_(0),
       revent_(0),
-      status(-1)
+      status_(-1)
 {
-
-}
-
-Channel::~Channel() {
 
 }
 
@@ -69,7 +66,7 @@ void Channel::handle_event_with_guard(TimeStamp stamp) {
     if (revent_ & EPOLLOUT) {
         if (write_cb_) write_cb_();
     }
-    if (revent_ & (EPOLLERR | POLLNVAL) {
+    if (revent_ & (EPOLLERR | POLLNVAL)) {
         if (error_cb_) error_cb_();
     }
 }

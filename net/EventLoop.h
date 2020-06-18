@@ -3,13 +3,13 @@
  * @version: 
  * @Author: blalalt
  * @Date: 2020-05-21 20:46:02
- */ 
+ */
+#pragma once
 #include <memory>
 #include <vector>
 #include <thread>
 #include <mutex>
 #include "Timer.h"
-#include "../utils/TimeStamp.h"
 
 namespace conet {
 
@@ -19,6 +19,7 @@ class EventDemultiplexer;
 
 class EventLoop {
 public:
+    typedef std::function<void()> Functor;
     EventLoop();
     ~EventLoop();
     void wakeup(); // 唤醒
@@ -49,7 +50,6 @@ private:
     void abort_not_inloop_thread();
 private:
     typedef int handle_t;
-    typedef std::function<void()> Functor;
     // 这里不控制 Channel的生命周期
     typedef std::vector<Channel*> ChannelList;
     // 四个状态值
