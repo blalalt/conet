@@ -29,6 +29,7 @@ namespace {
 }
 
 EventLoop::EventLoop()
+
     : quit_(false),
       looping_(false),
       doing_pending_functors_(false),

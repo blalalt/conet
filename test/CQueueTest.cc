@@ -24,7 +24,7 @@ void put_to_q() {
 void take_to_q() {
     int a ;
     q.take(a);
-    // cout << a << endl;
+    // cout << showSuggestions << endl;
 }
 
 void takeq1(ConcurrentQueue<int> & q1) {
